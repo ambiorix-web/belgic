@@ -6,8 +6,8 @@ import (
 	"github.com/devOpifex/eburon/internal/config"
 )
 
-func Run(path string) {
-	config, err := config.Read(path)
+func Run() {
+	config, err := config.Read()
 
 	if err != nil {
 		log.Fatal(err)

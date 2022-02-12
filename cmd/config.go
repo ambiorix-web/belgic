@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var conf string
+
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Create configuration file",
@@ -15,7 +17,10 @@ var configCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		config.Create(conf)
+		err = config.Create(conf)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

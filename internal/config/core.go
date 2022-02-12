@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -21,19 +22,36 @@ var Default = Config{
 	User:         "",
 }
 
+func getPath() (string, error) {
+	path := os.Getenv("EBURON_CONFIG")
+
+	if path == "" {
+		path = "/eburon.json"
+	}
+
+	isThere := exists(path)
+	fmt.Println(isThere)
+
+	if !isThere {
+		return path, errors.New("config file not found")
+	}
+
+	return path, nil
+}
+
 func exists(path string) bool {
 	_, err := os.Stat(path)
 
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func Read(path string) (Config, error) {
+func Read() (Config, error) {
 	var config Config
 
-	isThere := exists(path)
+	path, err := getPath()
 
-	if !isThere {
-		return config, errors.New("config file not found")
+	if err != nil {
+		return config, err
 	}
 
 	file, err := os.Open(path)
