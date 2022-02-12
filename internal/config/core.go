@@ -24,7 +24,7 @@ var Default = Config{
 func exists(path string) bool {
 	_, err := os.Stat(path)
 
-	return errors.Is(err, os.ErrNotExist)
+	return !errors.Is(err, os.ErrNotExist)
 }
 
 func Read(path string) (Config, error) {
@@ -72,7 +72,7 @@ func Create(path string) error {
 }
 
 func CheckConfigPath(path string) error {
-	found, err := regexp.MatchString("\\.json$||\\.config", path)
+	found, err := regexp.MatchString("\\.json$|\\.config$", path)
 
 	if err != nil {
 		return errors.New("could not check path")

@@ -28,5 +28,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&conf, "config", "/eburon/eburon.config", "location of the config file")
+	rootCmd.PersistentFlags().StringVarP(&conf, "config", "c", "/eburon/eburon.config", "location of the config file")
 }

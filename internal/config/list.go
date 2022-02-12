@@ -15,8 +15,8 @@ func (config Config) ListApps() ([]Applications, error) {
 		return apps, err
 	}
 
-	for file := range dirs {
-		fmt.Println(file)
+	for _, file := range dirs {
+		fmt.Println(file.IsDir())
 	}
 
 	return apps, nil

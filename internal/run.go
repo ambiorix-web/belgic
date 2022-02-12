@@ -13,5 +13,10 @@ func Run(path string) {
 		log.Fatal(err)
 	}
 
-	config.ListApps()
+	_, err = config.ListApps()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
