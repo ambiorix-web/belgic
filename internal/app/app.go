@@ -22,7 +22,7 @@ func (app Application) home(procs []proc) func(w http.ResponseWriter, r *http.Re
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.Path == "/" {
-			app.render(w, r, app.Conf.GetIndex(), app.Cmds)
+			app.render(w, r, "index.html", "ui/index.html")
 			return
 		}
 
@@ -37,8 +37,7 @@ func (app Application) home(procs []proc) func(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		w.Write([]byte("App not found"))
-
+		app.render(w, r, "404.html", "ui/404.html")
 	}
 }
 

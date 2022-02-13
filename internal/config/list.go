@@ -1,9 +1,7 @@
 package config
 
 import (
-	"errors"
 	"os"
-	"path"
 )
 
 // ApplicationName is the name of an application, also its path.
@@ -30,16 +28,4 @@ func (config Config) ListApps() (ApplicationNames, error) {
 	}
 
 	return apps, nil
-}
-
-func (conf Config) GetIndex() string {
-	p := path.Join(conf.Applications, "index.html")
-
-	_, err := os.Stat(p)
-
-	if errors.Is(err, os.ErrNotExist) {
-		return ""
-	}
-
-	return p
 }
