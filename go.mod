@@ -1,4 +1,4 @@
-module github.com/devOpifex/eburon
+module github.com/devOpifex/belgic
 
 go 1.17
 

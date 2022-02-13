@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/devOpifex/eburon/internal/config"
+	"github.com/devOpifex/belgic/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +27,6 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringVarP(&conf, "path", "p", "/eburon", "Path to the config file")
+	configCmd.Flags().StringVarP(&conf, "path", "p", "/belgic", "Path to the config file")
 	rootCmd.AddCommand(configCmd)
 }

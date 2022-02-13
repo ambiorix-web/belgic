@@ -1,17 +1,17 @@
-# Eburon
+# Belgic
 
 A webserver for [ambiorix](https://ambiorix.john-coene.com) applications.
 
 ## Install
 
 ```bash
-go get github.com/devOpifex/eburon
+go get github.com/devOpifex/belgic
 ```
 
 or
 
 ``` bash
-go install github.com/devOpifex/eburon@latest
+go install github.com/devOpifex/belgic@latest
 ```
 
 or download one of the available binaries.
@@ -19,11 +19,11 @@ or download one of the available binaries.
 
 ## Use
 
-Eburon requires a very simple configuration file.
+belgic requires a very simple configuration file.
 
 ```json
 {
- "applications": "/eburon/apps",
+ "applications": "/belgic/apps",
  "port": "8080"
 }
 ```
@@ -33,7 +33,7 @@ path_ to the _directory_ where you want the configuration file
 to be created.
 
 ```bash
-./eburon config -p "path/to/directory"
+./belgic config -p "path/to/directory"
 ```
 
 - `applications`: the directory containing the ambiorix applications
@@ -43,16 +43,16 @@ you want to serve.
 Voilà, all set, just launch the server.
 
 ```bash
-./eburon
+./belgic
 ```
 
 ## How it works
 
 It's very similar to the way shiny-server works.
-Point eburon to a directory containing the applications you want
+Point Belgic to a directory containing the applications you want
 to serve (in the config file).
 
-Eburon then looks at all these apps and serves them individually.
+belgic then looks at all these apps and serves them individually.
 e.g.:
 
 ```
@@ -63,6 +63,6 @@ e.g.:
   |   app.R
 ```
 
-In the above, point the config file to `/apps`, run eburon,
+In the above, point the config file to `/apps`, run belgic,
 then the applications will be served at `mysite.com/app1`
 and `mysite.com/app2`.

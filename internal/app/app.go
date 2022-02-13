@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/devOpifex/eburon/internal/config"
+	"github.com/devOpifex/belgic/internal/config"
 )
 
-// Application the core eburon application.
+// Application the core belgic application.
 type Application struct {
 	Conf config.Config
 	Cmds config.RCommands
@@ -43,7 +43,7 @@ func (app Application) handlers(procs []proc) http.Handler {
 	return mux
 }
 
-// StartApp starts the eburon application and creates the proxies.
+// StartApp starts the application and creates the proxies.
 func StartApp(conf config.Config, cmds config.RCommands) error {
 	app := Application{
 		Conf: conf,
@@ -63,7 +63,7 @@ func StartApp(conf config.Config, cmds config.RCommands) error {
 func (p proc) serve(w http.ResponseWriter, r *http.Request) {
 	r.Host = p.host
 	r.URL.Path = cleanPath(r.URL.Path)
-	w.Header().Set("X-Powered-By", "Eburon")
+	w.Header().Set("X-Powered-By", "Belgic")
 	p.proxy.ServeHTTP(w, r)
 }
 

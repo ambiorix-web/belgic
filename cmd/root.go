@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/devOpifex/eburon/internal"
+	"github.com/devOpifex/belgic/internal"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "eburon",
-	Short: "Eburon is a web server for {ambiorix} applications",
+	Use:   "belgic",
+	Short: "Belgic is a web server for {ambiorix} applications",
 	Long: `A webserver to easily manage {ambiorix} applications
   	to simplify deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {

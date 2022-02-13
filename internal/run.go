@@ -4,11 +4,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/devOpifex/eburon/internal/app"
-	"github.com/devOpifex/eburon/internal/config"
+	"github.com/devOpifex/belgic/internal/app"
+	"github.com/devOpifex/belgic/internal/config"
 )
 
-// Run run eburon.
+// Run run belgic.
 func Run() {
 	config, err := config.Read()
 

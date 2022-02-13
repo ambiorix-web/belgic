@@ -20,17 +20,17 @@ type Config struct {
 
 // Default configuration object.
 var Default = Config{
-	Applications: "/eburon/apps",
+	Applications: "/belgic/apps",
 	Port:         "8080",
 }
 
 // getPath retrieves the path to the configuration file from
 // the environment variable.
 func getPathConfig() (string, error) {
-	path := os.Getenv("EBURON_CONFIG")
+	path := os.Getenv("BELGIC_CONFIG")
 
 	if path == "" {
-		path = "/eburon.json"
+		path = "/belgic.json"
 	}
 
 	return path, nil
@@ -73,7 +73,7 @@ func Create(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(filepath.Join(path, "eburon.json"), file, 0644)
+	return ioutil.WriteFile(filepath.Join(path, "belgic.json"), file, 0644)
 }
 
 // CheckConfigPath Checks that the path to create the configuration file
