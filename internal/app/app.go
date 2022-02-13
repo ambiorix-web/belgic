@@ -20,6 +20,12 @@ type Application struct {
 // proxy redirection.
 func (app Application) home(procs []proc) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		if r.URL.Path == "/" {
+			app.render(w, r, app.Conf.GetIndex(), app.Cmds)
+			return
+		}
+
 		path := strings.Split(r.URL.Path, "/")[1]
 
 		for _, p := range procs {
@@ -105,7 +111,7 @@ func createProxies(cmds config.RCommands) []proc {
 
 		p := proc{
 			host:  uri.Host,
-			name:  string(cmd.Application),
+			name:  string(cmd.Name),
 			proxy: httputil.NewSingleHostReverseProxy(uri),
 		}
 

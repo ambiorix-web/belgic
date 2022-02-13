@@ -36,7 +36,7 @@ func Run() {
 			config.ErrorLog.Fatal(cmd.Err)
 		}
 
-		config.InfoLog.Printf("%v is running on port %v", cmd.Application, cmd.Port)
+		config.InfoLog.Printf("%v is running on port %v", cmd.Name, cmd.Port)
 	}
 
 	err = app.StartApp(config, cmds)

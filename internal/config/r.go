@@ -22,10 +22,10 @@ func getR() (string, error) {
 
 // RCommand represents a single R command.
 type RCommand struct {
-	Application ApplicationName
-	Err         error
-	Cmd         *exec.Cmd
-	Port        int
+	Name ApplicationName
+	Err  error
+	Cmd  *exec.Cmd
+	Port int
 }
 
 // RCommands represents an array of R commands.
@@ -45,7 +45,7 @@ func (conf Config) RunApps(apps ApplicationNames) (RCommands, error) {
 // runApp run a single application.
 func (conf Config) runApp(app ApplicationName) RCommand {
 	var rcmd RCommand
-	rcmd.Application = app
+	rcmd.Name = app
 
 	cmd, port, err := conf.callApp(app)
 
