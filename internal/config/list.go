@@ -1,14 +1,13 @@
 package config
 
 import (
-	"fmt"
 	"os"
 )
 
-type Applications string
+type Application string
 
-func (config Config) ListApps() ([]Applications, error) {
-	var apps []Applications
+func (config Config) ListApps() ([]Application, error) {
+	var apps []Application
 	dirs, err := os.ReadDir(config.Applications)
 
 	if err != nil {
@@ -16,7 +15,11 @@ func (config Config) ListApps() ([]Applications, error) {
 	}
 
 	for _, file := range dirs {
-		fmt.Println(file.IsDir())
+		if !file.IsDir() {
+			continue
+		}
+
+		apps = append(apps, Application(file.Name()))
 	}
 
 	return apps, nil

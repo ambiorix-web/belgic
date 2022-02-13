@@ -13,10 +13,11 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	_, err = config.ListApps()
+	apps, err := config.ListApps()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	config.RunApps(apps)
 }

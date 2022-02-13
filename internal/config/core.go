@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -29,20 +28,7 @@ func getPath() (string, error) {
 		path = "/eburon.json"
 	}
 
-	isThere := exists(path)
-	fmt.Println(isThere)
-
-	if !isThere {
-		return path, errors.New("config file not found")
-	}
-
 	return path, nil
-}
-
-func exists(path string) bool {
-	_, err := os.Stat(path)
-
-	return !errors.Is(err, os.ErrNotExist)
 }
 
 func Read() (Config, error) {
@@ -74,12 +60,6 @@ func Read() (Config, error) {
 }
 
 func Create(path string) error {
-	isThere := exists(path)
-
-	if isThere {
-		return errors.New("config file already exists")
-	}
-
 	file, err := json.MarshalIndent(Default, "", " ")
 
 	if err != nil {
