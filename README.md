@@ -68,3 +68,20 @@ e.g.:
 In the above, point the config file to `/apps`, run belgic,
 then the applications will be served at `mysite.com/app1`
 and `mysite.com/app2`.
+
+## Customise
+
+You can change the homepage (at `/`) that displays all the applications
+served as well as the 404 page.
+
+To do so, at the root of the directory containing your applications
+(path specified in the config file), place:
+
+- `index.html`: to change the homepage.
+- `404.html`: to change the 404 page.
+
+These are rendered using Go's standard template module which is also
+used by Hugo, so if you have used blogdown in the past this should 
+look familiar. Best place to start is probably the very simple source
+code of the default 
+[index.html](https://github.com/devOpifex/belgic/blob/master/internal/app/ui/index.html).
