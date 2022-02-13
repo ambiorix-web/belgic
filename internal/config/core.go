@@ -14,7 +14,6 @@ import (
 type Config struct {
 	Applications string `json:"applications"` // path to applications
 	Port         string `json:"port"`         // port to server apps on
-	User         string `json:"user"`         // user to run as
 	InfoLog      *log.Logger
 	ErrorLog     *log.Logger
 }
@@ -23,7 +22,6 @@ type Config struct {
 var Default = Config{
 	Applications: "/eburon/apps",
 	Port:         "8080",
-	User:         "",
 }
 
 // getPath retrieves the path to the configuration file from

@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Use:   "eburon",
 	Short: "Eburon is a web server for {ambiorix} applications",
 	Long: `A webserver to easily manage {ambiorix} applications
-  	which also eases the management of concurrent users.`,
+  	to simplify deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.Run()
 	},
