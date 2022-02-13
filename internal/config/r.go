@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 )
 
-func getRscript() (string, error) {
+// getR retrieves the full path to the R installation.
+func getR() (string, error) {
 	var p string
 
 	p, err := exec.LookPath("R")
@@ -19,16 +20,19 @@ func getRscript() (string, error) {
 	return p, nil
 }
 
+// RCommand represents a single R command.
 type RCommand struct {
-	Application Application
+	Application ApplicationName
 	Err         error
 	Cmd         *exec.Cmd
 	Port        int
 }
 
+// RCommands represents an array of R commands.
 type RCommands []RCommand
 
-func (conf Config) RunApps(apps []Application) (RCommands, error) {
+// RunApps runs all the applications found in the directory.
+func (conf Config) RunApps(apps ApplicationNames) (RCommands, error) {
 	var cmds RCommands
 
 	for _, app := range apps {
@@ -38,7 +42,8 @@ func (conf Config) RunApps(apps []Application) (RCommands, error) {
 	return cmds, nil
 }
 
-func (conf Config) runApp(app Application) RCommand {
+// runApp run a single application.
+func (conf Config) runApp(app ApplicationName) RCommand {
 	var rcmd RCommand
 	rcmd.Application = app
 
@@ -59,10 +64,11 @@ func (conf Config) runApp(app Application) RCommand {
 	return rcmd
 }
 
-func (conf Config) callApp(app Application) (*exec.Cmd, int, error) {
+// callApp calls R to launch an ambiorix application.
+func (conf Config) callApp(app ApplicationName) (*exec.Cmd, int, error) {
 	var cmd *exec.Cmd
 	var port int
-	rprog, err := getRscript()
+	rprog, err := getR()
 
 	if err != nil {
 		return cmd, port, err
@@ -85,10 +91,11 @@ func (conf Config) callApp(app Application) (*exec.Cmd, int, error) {
 	return cmd, port, nil
 }
 
-func makeCall(base string, app Application) (string, int, error) {
+// makeCall creates the R code used to launch the application.
+func makeCall(base string, app ApplicationName) (string, int, error) {
 	var script string
 
-	path := filepath.Join(base, string(app))
+	path := filepath.Join(base, string(app), "app.R")
 	port, err := GetFreePort()
 
 	if err != nil {

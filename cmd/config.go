@@ -7,8 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// conf path to the configuration file to create.
 var conf string
 
+// configCmd is a command to create an initial config file.
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Create configuration file",

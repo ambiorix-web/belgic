@@ -4,9 +4,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/devOpifex/eburon/internal/app"
 	"github.com/devOpifex/eburon/internal/config"
 )
 
+// Run run eburon.
 func Run() {
 	config, err := config.Read()
 
@@ -35,5 +37,10 @@ func Run() {
 		}
 
 		config.InfoLog.Printf("%v is running on port %v", cmd.Application, cmd.Port)
+	}
+
+	err = app.StartApp(config, cmds)
+	if err != nil {
+		config.ErrorLog.Fatal(err)
 	}
 }

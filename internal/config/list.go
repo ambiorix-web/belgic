@@ -4,10 +4,15 @@ import (
 	"os"
 )
 
-type Application string
+// ApplicationName is the name of an application, also its path.
+type ApplicationName string
 
-func (config Config) ListApps() ([]Application, error) {
-	var apps []Application
+// ApplicationNames is an array of names of applications, also their paths.
+type ApplicationNames []ApplicationName
+
+// ListApps lists the applications present in the directory.
+func (config Config) ListApps() (ApplicationNames, error) {
+	var apps ApplicationNames
 	dirs, err := os.ReadDir(config.Applications)
 
 	if err != nil {
@@ -19,7 +24,7 @@ func (config Config) ListApps() ([]Application, error) {
 			continue
 		}
 
-		apps = append(apps, Application(file.Name()))
+		apps = append(apps, ApplicationName(file.Name()))
 	}
 
 	return apps, nil

@@ -2,6 +2,8 @@ package config
 
 import "net"
 
+// GetFreePort retrieves a free (available) to set as
+// option in R before launching application.
 func GetFreePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
@@ -14,14 +16,4 @@ func GetFreePort() (int, error) {
 	}
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port, nil
-}
-
-// GetPort is deprecated, use GetFreePort instead
-// Ask the kernel for a free open port that is ready to use
-func GetPort() int {
-	port, err := GetFreePort()
-	if err != nil {
-		panic(err)
-	}
-	return port
 }

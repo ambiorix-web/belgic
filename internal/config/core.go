@@ -10,6 +10,7 @@ import (
 	"regexp"
 )
 
+// Config structure.
 type Config struct {
 	Applications string `json:"applications"` // path to applications
 	Port         string `json:"port"`         // port to server apps on
@@ -18,13 +19,16 @@ type Config struct {
 	ErrorLog     *log.Logger
 }
 
+// Default configuration object.
 var Default = Config{
 	Applications: "/eburon/apps",
 	Port:         "8080",
 	User:         "",
 }
 
-func getPath() (string, error) {
+// getPath retrieves the path to the configuration file from
+// the environment variable.
+func getPathConfig() (string, error) {
 	path := os.Getenv("EBURON_CONFIG")
 
 	if path == "" {
@@ -34,10 +38,11 @@ func getPath() (string, error) {
 	return path, nil
 }
 
+// Read the configuration file.
 func Read() (Config, error) {
 	var config Config
 
-	path, err := getPath()
+	path, err := getPathConfig()
 
 	if err != nil {
 		return config, err
@@ -62,6 +67,7 @@ func Read() (Config, error) {
 	return config, err
 }
 
+// Create the default configuration file.
 func Create(path string) error {
 	file, err := json.MarshalIndent(Default, "", " ")
 
@@ -72,6 +78,8 @@ func Create(path string) error {
 	return ioutil.WriteFile(filepath.Join(path, "eburon.json"), file, 0644)
 }
 
+// CheckConfigPath Checks that the path to create the configuration file
+// is correct.
 func CheckConfigPath(path string) error {
 	found, err := regexp.MatchString("\\.json$|\\.config$", path)
 
