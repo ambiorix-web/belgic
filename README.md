@@ -18,7 +18,7 @@ or download one of the available binaries.
 
 ## Use
 
-belgic requires a very simple configuration file.
+Belgic requires a very simple configuration file.
 
 ```json
 {
