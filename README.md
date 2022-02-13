@@ -16,7 +16,6 @@ go install github.com/devOpifex/belgic@latest
 
 or download one of the available binaries.
 
-
 ## Use
 
 belgic requires a very simple configuration file.
@@ -40,6 +39,9 @@ to be created.
 you want to serve.
 - `port`: port on which the apps should be served.
 
+Add the `BELGIC_CONFIG` environment variable to point to the configuration
+file you just created.
+
 Voilà, all set, just launch the server.
 
 ```bash
@@ -60,7 +62,7 @@ e.g.:
   | /app1
   |   app.R
   | /app2
-  |   app.R
+      app.R
 ```
 
 In the above, point the config file to `/apps`, run belgic,
