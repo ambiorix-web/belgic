@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,6 +14,8 @@ type Config struct {
 	Applications string `json:"applications"` // path to applications
 	Port         string `json:"port"`         // port to server apps on
 	User         string `json:"user"`         // user to run as
+	InfoLog      *log.Logger
+	ErrorLog     *log.Logger
 }
 
 var Default = Config{
