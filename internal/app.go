@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,27 +12,33 @@ var idx int = 0
 
 // home handles the home page of the application and the reverse
 // proxy redirection.
-func (lb loadBalancer) balance(procs []proc) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		maxLen := len(lb.Backends)
-		// Round Robin
-		mu.Lock()
-		currentBackend := lb.Backends[idx%maxLen]
-		targetURL, err := url.Parse(currentBackend.Path)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+func (lb loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
+	maxLen := len(lb.Backends)
+	// Round Robin
+	mu.Lock()
+	currentBackend := &lb.Backends[idx%maxLen]
+	if !currentBackend.IsLive() {
 		idx++
-		mu.Unlock()
-		reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-		reverseProxy.ServeHTTP(w, r)
 	}
+	targetURL, err := url.Parse(currentBackend.Path)
+	if err != nil {
+		lb.ErrorLog.Printf(err.Error())
+	}
+	idx++
+	mu.Unlock()
+	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
+	reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
+		lb.ErrorLog.Printf("%v is dead.", currentBackend.Port)
+		currentBackend.SetLive(false)
+		lb.balance(w, r)
+	}
+	reverseProxy.ServeHTTP(w, r)
 }
 
 // handlers binds handlers to the server.
-func (lb loadBalancer) handlers(procs []proc) http.Handler {
+func (lb loadBalancer) handlers() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", lb.balance(procs))
+	mux.HandleFunc("/", lb.balance)
 	return mux
 }
 
@@ -51,40 +55,12 @@ type proc struct {
 	proxy *httputil.ReverseProxy
 }
 
-// createProxies creates an individual reverse proxy for
-// each application.
-func (lb loadBalancer) createProxies() []proc {
-	var proxies []proc
-	for _, cmd := range lb.Backends {
-		if cmd.Err != nil {
-			continue
-		}
-
-		target := "http://127.0.0.1:" + fmt.Sprint(cmd.Port)
-		uri, err := url.Parse(target)
-
-		if err != nil {
-			continue
-		}
-
-		p := proc{
-			host:  uri.Host,
-			proxy: httputil.NewSingleHostReverseProxy(uri),
-		}
-
-		proxies = append(proxies, p)
-	}
-
-	return proxies
-}
-
 // StartApp starts the application and creates the proxies.
 func (lb loadBalancer) StartApp() error {
-	proxies := lb.createProxies()
 	srv := &http.Server{
 		Addr:     ":" + lb.Config.Port,
 		ErrorLog: lb.ErrorLog,
-		Handler:  lb.handlers(proxies),
+		Handler:  lb.handlers(),
 	}
 
 	return srv.ListenAndServe()

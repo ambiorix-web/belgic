@@ -16,12 +16,25 @@ type Backend struct {
 	Cmd  *exec.Cmd
 	Port int
 	Path string
-	Mu   *sync.Mutex
+	Mu   sync.RWMutex
 	Live bool
 }
 
 // RCommands represents an array of R commands.
 type Backends []Backend
+
+func (backend *Backend) SetLive(b bool) {
+	backend.Mu.Lock()
+	backend.Live = b
+	backend.Mu.Unlock()
+}
+
+func (backend *Backend) IsLive() bool {
+	backend.Mu.RLock()
+	isAlive := backend.Live
+	backend.Mu.RUnlock()
+	return isAlive
+}
 
 // getR retrieves the full path to the R installation.
 func getR() (string, error) {
@@ -69,6 +82,7 @@ func (conf Config) runApp() Backend {
 	back.Path = "http://localhost:" + strconv.Itoa(port)
 	back.Cmd = cmd
 	back.Err = back.Cmd.Start()
+	back.Live = true
 
 	if back.Err != nil {
 		return back
