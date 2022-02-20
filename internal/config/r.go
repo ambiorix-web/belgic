@@ -39,7 +39,7 @@ func getR() (string, error) {
 // RunApps runs all the applications found in the directory.
 func (conf Config) RunApps() (Backends, error) {
 	var backs Backends
-	ncpus, err := strconv.Atoi(conf.Background)
+	ncpus, err := strconv.Atoi(conf.Backends)
 
 	// error we assume it was set to max
 	// default to max CPUs

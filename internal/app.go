@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"sync"
 )
 
@@ -42,22 +41,8 @@ func (lb loadBalancer) handlers(procs []proc) http.Handler {
 // serve serves a reverse proxy
 func (p proc) serve(w http.ResponseWriter, r *http.Request) {
 	r.Host = p.host
-	r.URL.Path = cleanPath(r.URL.Path)
 	w.Header().Set("X-Powered-By", "Belgic")
 	p.proxy.ServeHTTP(w, r)
-}
-
-// cleanPath removes the first element from a path for the
-// reverse proxy to forward to the correct path.
-func cleanPath(path string) string {
-	var cleaned string
-	paths := strings.Split(path, "/")[2:]
-
-	for _, p := range paths {
-		cleaned += "/" + p
-	}
-
-	return cleaned
 }
 
 // proc rerpresents a proxy.
@@ -75,7 +60,7 @@ func (lb loadBalancer) createProxies() []proc {
 			continue
 		}
 
-		target := "http://localhost:" + fmt.Sprint(cmd.Port)
+		target := "http://127.0.0.1:" + fmt.Sprint(cmd.Port)
 		uri, err := url.Parse(target)
 
 		if err != nil {

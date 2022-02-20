@@ -11,16 +11,16 @@ import (
 
 // Config structure.
 type Config struct {
-	Path       string `json:"path"` // path to application
-	Port       string `json:"port"` // port to server apps on
-	Background string `json:"background"`
+	Path     string `json:"path"` // path to application
+	Port     string `json:"port"` // port to server apps on
+	Backends string `json:"background"`
 }
 
 // Default configuration object.
 var Default = Config{
-	Path:       "/belgic",
-	Port:       "8080",
-	Background: "max",
+	Path:     "/belgic",
+	Port:     "8080",
+	Backends: "max",
 }
 
 // getPath retrieves the path to the configuration file from
