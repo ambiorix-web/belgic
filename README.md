@@ -1,6 +1,8 @@
 # Belgic
 
-A webserver for [ambiorix](https://ambiorix.john-coene.com) applications.
+A reverse proxy and load balancer for 
+[ambiorix](https://ambiorix.dev) applications
+(and [shiny](https://shiny.rstudio.com/)).
 
 ## Install
 
@@ -22,8 +24,9 @@ Belgic requires a very simple configuration file.
 
 ```json
 {
- "applications": "/belgic/apps",
- "port": "8080"
+ "path": "/belgic",
+ "port": "8080",
+ "backends": "max",
 }
 ```
 
@@ -35,9 +38,11 @@ to be created.
 ./belgic config -p "path/to/directory"
 ```
 
-- `applications`: the directory containing the ambiorix applications
-you want to serve.
+- `path`: the path containing the ambiorix application
+you want to serve. It assumes the application is in an `app.R` file.
 - `port`: port on which the apps should be served.
+- `backends`: Number of background applications to run in the background.
+Defaults to the maximum number of cores available on the machine.
 
 Add the `BELGIC_CONFIG` environment variable to point to the configuration
 file you just created.
@@ -45,43 +50,16 @@ file you just created.
 Voilà, all set, just launch the server.
 
 ```bash
-./belgic
+./belgic start
 ```
 
-## How it works
+## Backends
 
-It's very similar to the way shiny-server works.
-Point Belgic to a directory containing the applications you want
-to serve (in the config file).
-
-belgic then looks at all these apps and serves them individually.
-e.g.:
-
-```
-/apps
-  | /app1
-  |   app.R
-  | /app2
-      app.R
-```
-
-In the above, point the config file to `/apps`, run belgic,
-then the applications will be served at `mysite.com/app1`
-and `mysite.com/app2`.
-
-## Customise
-
-You can change the homepage (at `/`) that displays all the applications
-served as well as the 404 page.
-
-To do so, at the root of the directory containing your applications
-(path specified in the config file), place:
-
-- `index.html`: to change the homepage.
-- `404.html`: to change the 404 page.
-
-These are rendered using Go's standard template module which is also
-used by Hugo, so if you have used blogdown in the past this should 
-look familiar. Best place to start is probably the very simple source
-code of the default 
-[index.html](https://github.com/devOpifex/belgic/blob/master/internal/app/ui/index.html).
+The server will launch multiple applications in the background.
+The number of applications running in the background is determined
+by the `backends` variable defined in the configuration file.
+Either set this option to the number of applications you want to 
+run in the background __as a string__, 
+e.g.: set it to `"4"` not `4`.
+If set to `"max"` if will run one application for each core
+available on the machine.
