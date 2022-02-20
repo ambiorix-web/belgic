@@ -8,39 +8,43 @@ import (
 	"github.com/devOpifex/belgic/internal/config"
 )
 
+type loadBalancer struct {
+	App      app.Application
+	Config   config.Config
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
+}
+
 // Run run belgic.
 func Run() {
+	var lb loadBalancer
+	lb.InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	lb.ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
+
 	config, err := config.Read()
 
-	config.InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	config.ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
-
 	if err != nil {
-		config.ErrorLog.Fatal(err)
+		lb.ErrorLog.Fatal(err)
 	}
 
-	apps, err := config.ListApps()
+	lb.Config = config
+
+	cmds, err := config.RunApps()
 
 	if err != nil {
-		config.ErrorLog.Fatal(err)
-	}
-
-	cmds, err := config.RunApps(apps)
-
-	if err != nil {
-		config.ErrorLog.Fatal(err)
+		lb.ErrorLog.Fatal(err)
 	}
 
 	for _, cmd := range cmds {
 		if cmd.Err != nil {
-			config.ErrorLog.Fatal(cmd.Err)
+			lb.ErrorLog.Fatal(cmd.Err)
 		}
 
-		config.InfoLog.Printf("%v is running on port %v", cmd.Name, cmd.Port)
+		lb.InfoLog.Printf("%v is running on port %v", cmd.Name, cmd.Port)
 	}
 
 	err = app.StartApp(config, cmds)
 	if err != nil {
-		config.ErrorLog.Fatal(err)
+		lb.ErrorLog.Fatal(err)
 	}
 }

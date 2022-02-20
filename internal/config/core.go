@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,16 +11,16 @@ import (
 
 // Config structure.
 type Config struct {
-	Applications string `json:"applications"` // path to applications
-	Port         string `json:"port"`         // port to server apps on
-	InfoLog      *log.Logger
-	ErrorLog     *log.Logger
+	Path       string `json:"path"` // path to application
+	Port       string `json:"port"` // port to server apps on
+	Background string `json:"background"`
 }
 
 // Default configuration object.
 var Default = Config{
-	Applications: "/belgic/apps",
-	Port:         "8080",
+	Path:       "/belgic",
+	Port:       "8080",
+	Background: "max",
 }
 
 // getPath retrieves the path to the configuration file from

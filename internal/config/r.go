@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 )
 
 // getR retrieves the full path to the R installation.
@@ -22,7 +24,6 @@ func getR() (string, error) {
 
 // RCommand represents a single R command.
 type RCommand struct {
-	Name ApplicationName
 	Err  error
 	Cmd  *exec.Cmd
 	Port int
@@ -32,22 +33,29 @@ type RCommand struct {
 type RCommands []RCommand
 
 // RunApps runs all the applications found in the directory.
-func (conf Config) RunApps(apps ApplicationNames) (RCommands, error) {
+func (conf Config) RunApps() (RCommands, error) {
 	var cmds RCommands
+	ncpus, err := strconv.Atoi(conf.Background)
 
-	for _, app := range apps {
-		cmd := conf.runApp(app)
+	// error we assume it was set to max
+	// default to max CPUs
+	if err != nil {
+		ncpus = runtime.NumCPU()
+	}
+
+	for i := 0; i < ncpus; i++ {
+		cmd := conf.runApp()
 		cmds = append(cmds, cmd)
 	}
+
 	return cmds, nil
 }
 
 // runApp run a single application.
-func (conf Config) runApp(app ApplicationName) RCommand {
+func (conf Config) runApp() RCommand {
 	var rcmd RCommand
-	rcmd.Name = app
 
-	cmd, port, err := conf.callApp(app)
+	cmd, port, err := conf.callApp()
 
 	if err != nil {
 		rcmd.Err = err
@@ -65,7 +73,7 @@ func (conf Config) runApp(app ApplicationName) RCommand {
 }
 
 // callApp calls R to launch an ambiorix application.
-func (conf Config) callApp(app ApplicationName) (*exec.Cmd, int, error) {
+func (conf Config) callApp() (*exec.Cmd, int, error) {
 	var cmd *exec.Cmd
 	var port int
 	rprog, err := getR()
@@ -74,7 +82,7 @@ func (conf Config) callApp(app ApplicationName) (*exec.Cmd, int, error) {
 		return cmd, port, err
 	}
 
-	script, port, err := makeCall(conf.Applications, app)
+	script, port, err := makeCall(conf.Path)
 
 	if err != nil {
 		return cmd, port, err
@@ -92,17 +100,17 @@ func (conf Config) callApp(app ApplicationName) (*exec.Cmd, int, error) {
 }
 
 // makeCall creates the R code used to launch the application.
-func makeCall(base string, app ApplicationName) (string, int, error) {
+func makeCall(base string) (string, int, error) {
 	var script string
 
-	path := filepath.Join(base, string(app), "app.R")
+	path := filepath.Join(base, "app.R")
 	port, err := GetFreePort()
 
 	if err != nil {
 		return script, port, err
 	}
 
-	script = "options(ambiorix.host = '0.0.0.0', ambiorix.port ='" + fmt.Sprint(port) + "');source('" + path + "')"
+	script = "options(ambiorix.host = '0.0.0.0', ambiorix.port.force ='" + fmt.Sprint(port) + "');source('" + path + "')"
 
 	return script, port, nil
 }

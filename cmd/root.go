@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/devOpifex/belgic/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Long: `A webserver to easily manage {ambiorix} applications
   	to simplify deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		internal.Run()
+		// do nothing
 	},
 }
 
