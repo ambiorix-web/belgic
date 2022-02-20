@@ -1,67 +1,42 @@
-package app
+package internal
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
-
-	"github.com/devOpifex/belgic/internal/config"
+	"sync"
 )
 
-// Application the core belgic application.
-type Application struct {
-	Conf config.Config
-	Cmds config.RCommands
-}
+var mu sync.Mutex
+var idx int = 0
 
 // home handles the home page of the application and the reverse
 // proxy redirection.
-func (app Application) home(procs []proc) func(w http.ResponseWriter, r *http.Request) {
+func (lb loadBalancer) balance(procs []proc) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		if r.URL.Path == "/" {
-			app.render(w, r, "index.html", "ui/index.html")
-			return
+		maxLen := len(lb.Backends)
+		// Round Robin
+		mu.Lock()
+		currentBackend := lb.Backends[idx%maxLen]
+		targetURL, err := url.Parse(currentBackend.Path)
+		if err != nil {
+			log.Fatal(err.Error())
 		}
-
-		path := strings.Split(r.URL.Path, "/")[1]
-
-		for _, p := range procs {
-			if p.name != path {
-				continue
-			}
-
-			p.serve(w, r)
-			return
-		}
-
-		app.render(w, r, "404.html", "ui/404.html")
+		idx++
+		mu.Unlock()
+		reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
+		reverseProxy.ServeHTTP(w, r)
 	}
 }
 
 // handlers binds handlers to the server.
-func (app Application) handlers(procs []proc) http.Handler {
+func (lb loadBalancer) handlers(procs []proc) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home(procs))
+	mux.HandleFunc("/", lb.balance(procs))
 	return mux
-}
-
-// StartApp starts the application and creates the proxies.
-func StartApp(conf config.Config, cmds config.RCommands) error {
-	app := Application{
-		Conf: conf,
-		Cmds: cmds,
-	}
-	proxies := createProxies(cmds)
-	srv := &http.Server{
-		Addr:     ":" + conf.Port,
-		ErrorLog: conf.ErrorLog,
-		Handler:  app.handlers(proxies),
-	}
-
-	return srv.ListenAndServe()
 }
 
 // serve serves a reverse proxy
@@ -87,16 +62,15 @@ func cleanPath(path string) string {
 
 // proc rerpresents a proxy.
 type proc struct {
-	name  string
 	host  string
 	proxy *httputil.ReverseProxy
 }
 
 // createProxies creates an individual reverse proxy for
 // each application.
-func createProxies(cmds config.RCommands) []proc {
+func (lb loadBalancer) createProxies() []proc {
 	var proxies []proc
-	for _, cmd := range cmds {
+	for _, cmd := range lb.Backends {
 		if cmd.Err != nil {
 			continue
 		}
@@ -110,7 +84,6 @@ func createProxies(cmds config.RCommands) []proc {
 
 		p := proc{
 			host:  uri.Host,
-			name:  string(cmd.Name),
 			proxy: httputil.NewSingleHostReverseProxy(uri),
 		}
 
@@ -118,4 +91,16 @@ func createProxies(cmds config.RCommands) []proc {
 	}
 
 	return proxies
+}
+
+// StartApp starts the application and creates the proxies.
+func (lb loadBalancer) StartApp() error {
+	proxies := lb.createProxies()
+	srv := &http.Server{
+		Addr:     ":" + lb.Config.Port,
+		ErrorLog: lb.ErrorLog,
+		Handler:  lb.handlers(proxies),
+	}
+
+	return srv.ListenAndServe()
 }

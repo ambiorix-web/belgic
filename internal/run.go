@@ -4,13 +4,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/devOpifex/belgic/internal/app"
 	"github.com/devOpifex/belgic/internal/config"
 )
 
 type loadBalancer struct {
-	App      app.Application
 	Config   config.Config
+	Backends config.Backends
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 }
@@ -29,21 +28,23 @@ func Run() {
 
 	lb.Config = config
 
-	cmds, err := config.RunApps()
+	backs, err := config.RunApps()
 
 	if err != nil {
 		lb.ErrorLog.Fatal(err)
 	}
 
-	for _, cmd := range cmds {
-		if cmd.Err != nil {
-			lb.ErrorLog.Fatal(cmd.Err)
+	lb.Backends = backs
+
+	for _, back := range backs {
+		if back.Err != nil {
+			lb.ErrorLog.Fatal(back.Err)
 		}
 
-		lb.InfoLog.Printf("%v is running on port %v", cmd.Name, cmd.Port)
+		lb.InfoLog.Printf("Running app on port %v\n", back.Port)
 	}
 
-	err = app.StartApp(config, cmds)
+	err = lb.StartApp()
 	if err != nil {
 		lb.ErrorLog.Fatal(err)
 	}

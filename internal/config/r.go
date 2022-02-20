@@ -7,7 +7,21 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"sync"
 )
+
+// RCommand represents a single R command.
+type Backend struct {
+	Err  error
+	Cmd  *exec.Cmd
+	Port int
+	Path string
+	Mu   *sync.Mutex
+	Live bool
+}
+
+// RCommands represents an array of R commands.
+type Backends []Backend
 
 // getR retrieves the full path to the R installation.
 func getR() (string, error) {
@@ -22,19 +36,9 @@ func getR() (string, error) {
 	return p, nil
 }
 
-// RCommand represents a single R command.
-type RCommand struct {
-	Err  error
-	Cmd  *exec.Cmd
-	Port int
-}
-
-// RCommands represents an array of R commands.
-type RCommands []RCommand
-
 // RunApps runs all the applications found in the directory.
-func (conf Config) RunApps() (RCommands, error) {
-	var cmds RCommands
+func (conf Config) RunApps() (Backends, error) {
+	var backs Backends
 	ncpus, err := strconv.Atoi(conf.Background)
 
 	// error we assume it was set to max
@@ -44,32 +48,33 @@ func (conf Config) RunApps() (RCommands, error) {
 	}
 
 	for i := 0; i < ncpus; i++ {
-		cmd := conf.runApp()
-		cmds = append(cmds, cmd)
+		back := conf.runApp()
+		backs = append(backs, back)
 	}
 
-	return cmds, nil
+	return backs, nil
 }
 
 // runApp run a single application.
-func (conf Config) runApp() RCommand {
-	var rcmd RCommand
+func (conf Config) runApp() Backend {
+	var back Backend
 
 	cmd, port, err := conf.callApp()
 
 	if err != nil {
-		rcmd.Err = err
-		return rcmd
+		back.Err = err
+		return back
 	}
-	rcmd.Port = port
-	rcmd.Cmd = cmd
-	rcmd.Err = rcmd.Cmd.Start()
+	back.Port = port
+	back.Path = "http://localhost:" + strconv.Itoa(port)
+	back.Cmd = cmd
+	back.Err = back.Cmd.Start()
 
-	if rcmd.Err != nil {
-		return rcmd
+	if back.Err != nil {
+		return back
 	}
 
-	return rcmd
+	return back
 }
 
 // callApp calls R to launch an ambiorix application.
@@ -110,7 +115,9 @@ func makeCall(base string) (string, int, error) {
 		return script, port, err
 	}
 
-	script = "options(ambiorix.host = '0.0.0.0', ambiorix.port.force ='" + fmt.Sprint(port) + "');source('" + path + "')"
+	script = "options(ambiorix.host = '0.0.0.0', ambiorix.port.force =" +
+		fmt.Sprint(port) + ", shiny.port = " +
+		fmt.Sprint(port) + ");source('" + path + "')"
 
 	return script, port, nil
 }
