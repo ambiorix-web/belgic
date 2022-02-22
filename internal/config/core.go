@@ -29,7 +29,7 @@ func getPathConfig() (string, error) {
 	path := os.Getenv("BELGIC_CONFIG")
 
 	if path == "" {
-		return "", errors.New("BELGIC_CONFIG environment variable not set")
+		return path, errors.New("BELGIC_CONFIG environment variable not set")
 	}
 
 	return path, nil

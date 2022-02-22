@@ -30,6 +30,10 @@ func (lb loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 	reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
 		lb.ErrorLog.Printf("%v is dead.", currentBackend.Port)
 		currentBackend.SetLive(false)
+		mu.Lock()
+		back := lb.Config.RunApp()
+		lb.Backends = append(lb.Backends, back)
+		mu.Unlock()
 		lb.balance(w, r)
 	}
 	reverseProxy.ServeHTTP(w, r)

@@ -36,13 +36,17 @@ func Run() {
 
 	lb.Backends = backs
 
+	lb.InfoLog.Printf("Running %v child processes", len(lb.Backends))
+
 	for _, back := range backs {
 		if back.Err != nil {
-			lb.ErrorLog.Fatal(back.Err)
+			back.SetLive(false)
+			back := lb.Config.RunApp()
+			lb.Backends = append(lb.Backends, back)
 		}
-
-		lb.InfoLog.Printf("Running app on port %v\n", back.Port)
 	}
+
+	lb.InfoLog.Printf("Running load balancer on %v", lb.Config.Port)
 
 	err = lb.StartApp()
 	if err != nil {

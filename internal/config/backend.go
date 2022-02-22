@@ -61,7 +61,7 @@ func (conf Config) RunApps() (Backends, error) {
 	}
 
 	for i := 0; i < ncpus; i++ {
-		back := conf.runApp()
+		back := conf.RunApp()
 		backs = append(backs, back)
 	}
 
@@ -69,7 +69,7 @@ func (conf Config) RunApps() (Backends, error) {
 }
 
 // runApp run a single application.
-func (conf Config) runApp() Backend {
+func (conf Config) RunApp() Backend {
 	var back Backend
 
 	cmd, port, err := conf.callApp()
