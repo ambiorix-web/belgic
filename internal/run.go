@@ -40,7 +40,6 @@ func Run() {
 
 	for _, back := range backs {
 		if back.Err != nil {
-			back.SetLive(false)
 			back := lb.Config.RunApp()
 			lb.Backends = append(lb.Backends, back)
 		}
