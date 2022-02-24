@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"sync"
@@ -109,16 +108,17 @@ func (conf Config) callApp() (*exec.Cmd, int, error) {
 func makeCall(base string) (string, int, error) {
 	var script string
 
-	path := filepath.Join(base, "app.R")
 	port, err := GetFreePort()
 
 	if err != nil {
 		return script, port, err
 	}
 
-	script = "options(ambiorix.host = '0.0.0.0', ambiorix.port.force =" +
+	script = "setwd('" + base + "');options(ambiorix.host = '0.0.0.0', ambiorix.port.force =" +
 		fmt.Sprint(port) + ", shiny.port = " +
-		fmt.Sprint(port) + ");source('" + path + "')"
+		fmt.Sprint(port) + ");source('app.R')"
+
+	fmt.Println(script)
 
 	return script, port, nil
 }

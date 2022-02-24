@@ -1,0 +1,11 @@
+Package: /home/john/Golang/src/github.com/devOpifex/belgic/app
+Title: An 'Ambiorix' Application
+Encoding: UTF-8
+LazyData: false
+Version: 0.0.1.9000
+Depends: R (>= 4.1.0)
+Imports:
+  ambiorix,
+  htmltools
+Suggests:
+  pkgload
