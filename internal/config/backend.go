@@ -63,20 +63,22 @@ func (back *Backend) callApp(stdout chan string) error {
 }
 
 func (back *Backend) ExecuteCommand(rprog, script string, stdout chan string) {
-	out, err := exec.Command(
+	cmd := exec.Command(
 		rprog,
 		"--no-save",
 		"--slave",
 		"-e",
 		script,
-	).Output()
+	)
+
+	stder, err := cmd.CombinedOutput()
 
 	if err != nil {
 		stdout <- err.Error()
 		return
 	}
 
-	stdout <- string(out)
+	stdout <- string(stder)
 }
 
 // makeCall creates the R code used to launch the application.
