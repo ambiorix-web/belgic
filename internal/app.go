@@ -5,6 +5,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"sync"
+
+	"github.com/devOpifex/belgic/internal/config"
 )
 
 var mu sync.Mutex
@@ -12,7 +14,7 @@ var idx int = 0
 
 // home handles the home page of the application and the reverse
 // proxy redirection (load balancer).
-func (lb loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
+func (lb *loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	i := idx % len(lb.Backends)
 	selectedBackend := &lb.Backends[i]
@@ -26,7 +28,14 @@ func (lb loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 	reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
 		lb.ErrorLog.Printf("%v is dead.", selectedBackend.Port)
 		mu.Lock()
-		back := lb.Config.RunApp()
+		var back config.Backend
+		err := back.RunApp(lb.Stdout)
+		// too much recursion
+		// should skip?
+		if err != nil {
+			lb.balance(w, r)
+		}
+
 		lb.Backends = append(lb.Backends[:i], lb.Backends[i+1:]...)
 		lb.Backends = append(lb.Backends, back)
 		mu.Unlock()

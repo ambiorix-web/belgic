@@ -3,9 +3,16 @@ pkgload::load_all(
   helpers = FALSE,
   attach_testthat = FALSE
 )
+
 library(ambiorix)
 
 app <- Ambiorix$new()
+
+app$use(\(req, res){
+  cat("RECEIVED\n", file = stdout())
+  cat("RECEIVED")
+  print("AAAAGH")
+})
 
 # 404 page
 app$not_found <- render_404

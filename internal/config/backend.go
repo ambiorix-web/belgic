@@ -4,23 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"runtime"
 	"strconv"
 	"sync"
 )
 
 // RCommand represents a single R command.
 type Backend struct {
-	Err  error
-	Cmd  *exec.Cmd
-	Port int
-	Path string
-	Mu   sync.RWMutex
-	Live bool
+	Port  int
+	Path  string
+	Rpath string
+	Mu    *sync.RWMutex
 }
-
-// RCommands represents an array of R commands.
-type Backends []Backend
 
 // getR retrieves the full path to the R installation.
 func getR() (string, error) {
@@ -35,73 +29,54 @@ func getR() (string, error) {
 	return p, nil
 }
 
-// RunApps runs all the applications found in the directory.
-func (conf Config) RunApps() (Backends, error) {
-	var backs Backends
-	ncpus, err := strconv.Atoi(conf.Backends)
-
-	// error we assume it was set to max
-	// default to max CPUs
-	if err != nil {
-		ncpus = runtime.NumCPU()
-	}
-
-	for i := 0; i < ncpus; i++ {
-		back := conf.RunApp()
-		backs = append(backs, back)
-	}
-
-	return backs, nil
-}
-
 // runApp run a single application.
-func (conf Config) RunApp() Backend {
-	var back Backend
-
-	cmd, port, err := conf.callApp()
+func (back *Backend) RunApp(stdout chan string) error {
+	err := back.callApp(stdout)
 
 	if err != nil {
-		back.Err = err
-		return back
-	}
-	back.Port = port
-	back.Path = "http://localhost:" + strconv.Itoa(port)
-	back.Cmd = cmd
-	back.Err = back.Cmd.Start()
-	back.Live = true
-
-	if back.Err != nil {
-		return back
+		return err
 	}
 
-	return back
+	return nil
 }
 
 // callApp calls R to launch an ambiorix application.
-func (conf Config) callApp() (*exec.Cmd, int, error) {
-	var cmd *exec.Cmd
-	var port int
+func (back *Backend) callApp(stdout chan string) error {
 	rprog, err := getR()
 
 	if err != nil {
-		return cmd, port, err
+		return err
 	}
 
-	script, port, err := makeCall(conf.Path)
+	script, port, err := makeCall(back.Rpath)
 
 	if err != nil {
-		return cmd, port, err
+		return err
 	}
 
-	cmd = exec.Command(
+	back.Port = port
+	back.Path = "http://localhost:" + strconv.Itoa(port)
+
+	go back.ExecuteCommand(rprog, script, stdout)
+
+	return nil
+}
+
+func (back *Backend) ExecuteCommand(rprog, script string, stdout chan string) {
+	out, err := exec.Command(
 		rprog,
 		"--no-save",
 		"--slave",
 		"-e",
 		script,
-	)
+	).Output()
 
-	return cmd, port, nil
+	if err != nil {
+		stdout <- err.Error()
+		return
+	}
+
+	stdout <- string(out)
 }
 
 // makeCall creates the R code used to launch the application.
@@ -117,8 +92,6 @@ func makeCall(base string) (string, int, error) {
 	script = "setwd('" + base + "');options(ambiorix.host = '0.0.0.0', ambiorix.port.force =" +
 		fmt.Sprint(port) + ", shiny.port = " +
 		fmt.Sprint(port) + ");source('app.R')"
-
-	fmt.Println(script)
 
 	return script, port, nil
 }

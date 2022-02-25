@@ -1,17 +1,21 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"runtime"
+	"strconv"
 
 	"github.com/devOpifex/belgic/internal/config"
 )
 
 type loadBalancer struct {
 	Config   config.Config
-	Backends config.Backends
+	Backends []config.Backend
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
+	Stdout   chan string
 }
 
 // Run run belgic.
@@ -20,35 +24,43 @@ func Run() {
 	lb.InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	lb.ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
 
-	config, err := config.Read()
+	conf, err := config.Read()
 
 	if err != nil {
 		lb.ErrorLog.Fatal(err)
 	}
 
-	lb.Config = config
+	lb.Config = conf
+	lb.Stdout = make(chan string)
+	lb.RunApps()
+}
 
-	backs, err := config.RunApps()
+func collect(c chan string) {
+	for {
+		fmt.Println(<-c)
+	}
+}
 
+// RunApps runs all the applications found in the directory.
+func (lb loadBalancer) RunApps() {
+	ncpus, err := strconv.Atoi(lb.Config.Backends)
+
+	// error we assume it was set to max
+	// default to max CPUs
 	if err != nil {
-		lb.ErrorLog.Fatal(err)
+		ncpus = runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	lb.Backends = backs
+	for i := 0; i < ncpus; i++ {
+		var back config.Backend
+		back.Rpath = lb.Config.Path
+		back.RunApp(lb.Stdout)
+		lb.Backends = append(lb.Backends, back)
+	}
 
 	lb.InfoLog.Printf("Running %v child processes", len(lb.Backends))
-
-	for _, back := range backs {
-		if back.Err != nil {
-			back := lb.Config.RunApp()
-			lb.Backends = append(lb.Backends, back)
-		}
-	}
-
 	lb.InfoLog.Printf("Running load balancer on %v", lb.Config.Port)
 
-	err = lb.StartApp()
-	if err != nil {
-		lb.ErrorLog.Fatal(err)
-	}
+	go collect(lb.Stdout)
+	lb.StartApp()
 }
