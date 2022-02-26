@@ -4,6 +4,12 @@ A reverse proxy and load balancer for
 [ambiorix](https://ambiorix.dev) applications
 (and [shiny](https://shiny.rstudio.com/)).
 
+:warning: This implements a round robin, requests are redirected to
+whatever backend is next on the queue. This means you should not
+store any session-related data in the environment, use databases,
+cookies, parameters, etc. (as one should anyway).
+This should not affect shiny applications.
+
 ## Install
 
 ```bash
