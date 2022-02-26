@@ -11,7 +11,8 @@ tags$html(
     tags$title("Ambiorix")
   ),
   tags$body(
-    tags$h1("[% title %]", class = "brand"),
+    h1("[% title %]", class = "brand"),
+    h3("Rendered .R file"),
     h3("Hi", name)
   )
 )

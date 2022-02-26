@@ -11,9 +11,10 @@ import (
 
 // Config structure.
 type Config struct {
-	Path     string `json:"path"` // path to application
-	Port     string `json:"port"` // port to server apps on
-	Backends string `json:"background"`
+	Path     string `json:"path"`       // path to application
+	Port     string `json:"port"`       // port to server apps on
+	Backends string `json:"background"` // number of backends to run
+	Attempts int    `json:"attempts"`   // maximum number of attempts
 }
 
 // Default configuration object.
@@ -21,6 +22,7 @@ var Default = Config{
 	Path:     "/belgic",
 	Port:     "8080",
 	Backends: "max",
+	Attempts: 5,
 }
 
 // getPath retrieves the path to the configuration file from
@@ -60,6 +62,11 @@ func Read() (Config, error) {
 	}
 
 	err = json.Unmarshal(byteValue, &config)
+
+	// need at least one backend
+	if config.Backends == "0" {
+		config.Backends = "1"
+	}
 
 	return config, err
 }

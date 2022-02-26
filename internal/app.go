@@ -11,6 +11,7 @@ import (
 
 var mu sync.Mutex
 var idx int = 0
+var attempts int
 
 // home handles the home page of the application and the reverse
 // proxy redirection (load balancer).
@@ -26,7 +27,17 @@ func (lb *loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 	mu.Unlock()
 	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
 	reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
-		lb.ErrorLog.Printf("%v is dead.", selectedBackend.Port)
+		if attempts > lb.Config.Attempts {
+			return
+		}
+
+		lb.ErrorLog.Printf(
+			"%v is dead, attempting %v to create new one",
+			attempts,
+			selectedBackend.Port,
+		)
+
+		attempts++
 		mu.Lock()
 		var back config.Backend
 		err := back.RunApp(lb.Stdout)
@@ -41,7 +52,13 @@ func (lb *loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 		mu.Unlock()
 		lb.balance(w, r)
 	}
-	lb.InfoLog.Printf("Request directed to %v", selectedBackend.Port)
+	attempts = 0
+	lb.InfoLog.Printf(
+		"%v on %s directed to %v",
+		r.Method,
+		r.URL.Path,
+		selectedBackend.Port,
+	)
 	reverseProxy.ServeHTTP(w, r)
 }
 
