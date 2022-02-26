@@ -57,12 +57,12 @@ func (back *Backend) callApp(stdout chan string) error {
 	back.Port = port
 	back.Path = "http://localhost:" + strconv.Itoa(port)
 
-	go back.ExecuteCommand(rprog, script, stdout)
+	go back.ExecuteCommand(port, rprog, script, stdout)
 
 	return nil
 }
 
-func (back *Backend) ExecuteCommand(rprog, script string, stdout chan string) {
+func (back *Backend) ExecuteCommand(port int, rprog, script string, stdout chan string) {
 	cmd := exec.Command(
 		rprog,
 		"--no-save",
@@ -71,14 +71,14 @@ func (back *Backend) ExecuteCommand(rprog, script string, stdout chan string) {
 		script,
 	)
 
-	stder, err := cmd.CombinedOutput()
+	out, err := cmd.Output()
 
 	if err != nil {
 		stdout <- err.Error()
 		return
 	}
 
-	stdout <- string(stder)
+	stdout <- string(out)
 }
 
 // makeCall creates the R code used to launch the application.
