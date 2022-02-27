@@ -93,7 +93,7 @@ func makeCall(base string) (string, int, error) {
 
 	script = "setwd('" + base + "');options(ambiorix.host = '0.0.0.0', ambiorix.port.force =" +
 		fmt.Sprint(port) + ", shiny.port = " +
-		fmt.Sprint(port) + ");source('app.R')"
+		fmt.Sprint(port) + ", ambiorix.logger = TRUE);source('app.R')"
 
 	return script, port, nil
 }

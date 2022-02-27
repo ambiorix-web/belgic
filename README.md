@@ -59,7 +59,8 @@ file you just created.
 Voilà, all set, just launch the server.
 
 ```bash
-./belgic start
+belgic start
+# ./belgic start
 ```
 
 ## Backends
