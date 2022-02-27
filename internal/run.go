@@ -35,7 +35,14 @@ func Run() {
 	lb.RunApps()
 }
 
+// collect Collect messages from stdout
 func collect(c chan string) {
+	// this currently does not work
+	// no issue on the Go side
+	// it's a problem or caveat with R
+	// or probably httpuv
+	// it seems the app is launch
+	// in an other subprocess
 	for {
 		fmt.Println(<-c)
 	}
