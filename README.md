@@ -1,4 +1,4 @@
-# Belgic
+![](belgic.png)
 
 A reverse proxy and load balancer for 
 [ambiorix](https://ambiorix.dev) applications
