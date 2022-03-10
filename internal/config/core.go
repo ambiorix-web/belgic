@@ -85,10 +85,14 @@ func Create(path string) error {
 // CheckConfigPath Checks that the path to create the configuration file
 // is correct.
 func CheckConfigPath(path string) error {
+	if path == "" {
+		return errors.New("must specify a path, see `p` flag")
+	}
+
 	found, err := regexp.MatchString("\\.json$|\\.config$", path)
 
 	if err != nil {
-		return errors.New("could not check path")
+		return errors.New("could not check path see `belgic config -h`")
 	}
 
 	if found {

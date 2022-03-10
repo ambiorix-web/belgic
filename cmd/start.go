@@ -8,6 +8,7 @@ import (
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the server",
+	Long:  "Start multiple instances of your {ambiorix} application",
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.Run()
 	},

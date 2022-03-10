@@ -10,8 +10,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "belgic",
 	Short: "Belgic is a web server for {ambiorix} applications",
-	Long: `A webserver to easily manage {ambiorix} applications
-  	to simplify deployment.`,
+	Long:  `A load balancer to easily scale an {ambiorix} application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// do nothing
 	},
