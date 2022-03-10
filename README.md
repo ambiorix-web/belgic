@@ -8,8 +8,7 @@ A reverse proxy and load balancer for
 whatever backend is next on the queue. This means you should not
 store any session-related data in the environment, use databases,
 cookies, parameters, etc. (as one should anyway).
-This only applies to ambiorix (multi-page) and 
-should not affect shiny applications (single-page).
+This will also have some impact on shiyn apps.
 
 ## Install
 
