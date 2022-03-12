@@ -22,7 +22,7 @@ or
 go install github.com/devOpifex/belgic@latest
 ```
 
-or download one of the available binaries.
+or download one of the [available binaries](https://github.com/devOpifex/belgic/tree/master/bin).
 
 ## Use
 
