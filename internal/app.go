@@ -5,8 +5,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"sync"
-
-	"github.com/devOpifex/belgic/internal/config"
 )
 
 var mu sync.Mutex
@@ -26,32 +24,38 @@ func (lb *loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 	idx++
 	mu.Unlock()
 	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-	reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
-		if attempts > lb.Config.Attempts {
-			return
-		}
+	// reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
+	// 	if e == nil {
+	// 		return
+	// 	}
+	// 	e
 
-		lb.ErrorLog.Printf(
-			"%v is dead, attempting %v to create new one",
-			attempts,
-			selectedBackend.Port,
-		)
+	// 	if attempts > lb.Config.Attempts {
+	// 		return
+	// 	}
 
-		attempts++
-		mu.Lock()
-		var back config.Backend
-		err := back.RunApp()
-		// too much recursion
-		// should skip?
-		if err != nil {
-			lb.balance(w, r)
-		}
+	// 	lb.ErrorLog.Printf(
+	// 		"%v is dead, attempting %v to create new one",
+	// 		selectedBackend.Port,
+	// 		attempts,
+	// 	)
 
-		lb.Backends = append(lb.Backends[:i], lb.Backends[i+1:]...)
-		lb.Backends = append(lb.Backends, back)
-		mu.Unlock()
-		lb.balance(w, r)
-	}
+	// 	attempts++
+	// 	mu.Lock()
+	// 	var back config.Backend
+	// 	err := back.RunApp()
+	// 	// too much recursion
+	// 	// should skip?
+	// 	if err != nil {
+	// 		lb.balance(w, r)
+	// 	}
+
+	// 	lb.Backends = append(lb.Backends[:i], lb.Backends[i+1:]...)
+	// 	lb.Backends = append(lb.Backends, back)
+	// 	mu.Unlock()
+	// 	lb.balance(w, r)
+	// }
+
 	attempts = 0
 	lb.InfoLog.Printf(
 		"%v on %s directed to %v",
