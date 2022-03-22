@@ -40,7 +40,7 @@ func (lb *loadBalancer) balance(w http.ResponseWriter, r *http.Request) {
 		attempts++
 		mu.Lock()
 		var back config.Backend
-		err := back.RunApp(lb.Stdout)
+		err := back.RunApp()
 		// too much recursion
 		// should skip?
 		if err != nil {

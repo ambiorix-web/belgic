@@ -30,8 +30,8 @@ func getR() (string, error) {
 }
 
 // runApp run a single application.
-func (back *Backend) RunApp(stdout chan string) error {
-	err := back.callApp(stdout)
+func (back *Backend) RunApp() error {
+	err := back.callApp()
 
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (back *Backend) RunApp(stdout chan string) error {
 }
 
 // callApp calls R to launch an ambiorix application.
-func (back *Backend) callApp(stdout chan string) error {
+func (back *Backend) callApp() error {
 	rprog, err := getR()
 
 	if err != nil {
@@ -57,12 +57,12 @@ func (back *Backend) callApp(stdout chan string) error {
 	back.Port = port
 	back.Path = "http://localhost:" + strconv.Itoa(port)
 
-	go back.ExecuteCommand(port, rprog, script, stdout)
+	go back.ExecuteCommand(port, rprog, script)
 
 	return nil
 }
 
-func (back *Backend) ExecuteCommand(port int, rprog, script string, stdout chan string) {
+func (back *Backend) ExecuteCommand(port int, rprog, script string) {
 	cmd := exec.Command(
 		rprog,
 		"--no-save",
@@ -71,14 +71,7 @@ func (back *Backend) ExecuteCommand(port int, rprog, script string, stdout chan 
 		script,
 	)
 
-	out, err := cmd.Output()
-
-	if err != nil {
-		stdout <- err.Error()
-		return
-	}
-
-	stdout <- string(out)
+	cmd.Output()
 }
 
 // makeCall creates the R code used to launch the application.

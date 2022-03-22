@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -15,7 +14,6 @@ type loadBalancer struct {
 	Backends []config.Backend
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
-	Stdout   chan string
 }
 
 // Run run belgic.
@@ -31,21 +29,7 @@ func Run() {
 	}
 
 	lb.Config = conf
-	lb.Stdout = make(chan string)
 	lb.RunApps()
-}
-
-// collect Collect messages from stdout
-func collect(c chan string) {
-	// this currently does not work
-	// no issue on the Go side
-	// it's a problem or caveat with R
-	// or probably httpuv
-	// it seems the app is launch
-	// in an other subprocess
-	for {
-		fmt.Println(<-c)
-	}
 }
 
 // RunApps runs all the applications found in the directory.
@@ -61,13 +45,12 @@ func (lb loadBalancer) RunApps() {
 	for i := 0; i < ncpus; i++ {
 		var back config.Backend
 		back.Rpath = lb.Config.Path
-		back.RunApp(lb.Stdout)
+		back.RunApp()
 		lb.Backends = append(lb.Backends, back)
 	}
 
 	lb.InfoLog.Printf("Running %v child processes", len(lb.Backends))
 	lb.InfoLog.Printf("Running load balancer on %v", lb.Config.Port)
 
-	go collect(lb.Stdout)
 	lb.StartApp()
 }
