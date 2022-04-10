@@ -1,3 +1,5 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/devOpifex/belgic.svg)](https://pkg.go.dev/github.com/devOpifex/belgic)
+
 ![](belgic.png)
 
 A reverse proxy and load balancer for 
